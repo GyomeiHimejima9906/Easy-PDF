@@ -1,0 +1,7 @@
+{
+  "name": "Easy PDF",
+  "description": "A Material Design 3 inspired PDF editor with advanced page management, annotation, and OCR capabilities.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -39,7 +39,7 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
 
   return (
     <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
-      {/* SVG Layer for Freehand Drawing - FIXED VIEWBOX & COORDINATES */}
+      {/* SVG Layer for Freehand Drawing */}
       <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
         {pageAnnotations.filter(a => a.type === 'freehand').map(ann => (
            <path
@@ -58,7 +58,7 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
         ))}
       </svg>
 
-      {/* HTML Layer for Shapes and Text */}
+      {/* HTML Layer for Shapes, Images and Text */}
       {pageAnnotations.map((ann) => {
         if (ann.type === 'freehand') return null;
 
@@ -71,32 +71,49 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
           position: 'absolute',
         };
 
-        // Handle OCR Text (Invisible Selectable Layer)
-        if (ann.type === 'ocr_text') {
-           return (
-             <div
-                key={ann.id}
-                className="absolute flex items-center justify-center leading-none overflow-hidden select-text pointer-events-auto"
-                style={{
-                    ...baseStyle,
-                    fontSize: `${ann.fontSize}px`, // Adjusted approximate size
-                    color: 'transparent',
-                    userSelect: 'text',
-                    cursor: 'text',
-                    whiteSpace: 'nowrap'
-                }}
-                title={ann.content} // Tooltip for debugging/usability
-             >
-                <span className="bg-brand-blue/20 text-transparent selection:bg-brand-blue/30 selection:text-brand-blue w-full h-full block">
-                    {ann.content}
-                </span>
-             </div>
-           );
-        }
-
         // Common selection outline
         const selectionRing = isSelected ? 'ring-1 ring-brand-blue ring-offset-1 ring-offset-transparent shadow-xl' : '';
 
+        // --- IMAGE ANNOTATION ---
+        if (ann.type === 'image' && ann.imageData) {
+          return (
+            <div
+              key={ann.id}
+              className={`pointer-events-auto group cursor-move ${selectionRing}`}
+              style={baseStyle}
+              onMouseDown={(e) => onMouseDown(e, ann.id, 'move')}
+            >
+              <img 
+                src={ann.imageData} 
+                alt="annotation" 
+                className="w-full h-full object-contain pointer-events-none select-none"
+              />
+              {isSelected && <ResizeHandles id={ann.id} />}
+            </div>
+          );
+        }
+
+        // --- RECTANGLE / WHITEOUT ---
+        if (ann.type === 'rect') {
+          return (
+            <div
+              key={ann.id}
+              className={`pointer-events-auto group cursor-move ${selectionRing}`}
+              style={{
+                ...baseStyle,
+                borderColor: ann.color,
+                borderWidth: ann.fill ? 0 : `${ann.strokeWidth || 2}px`, // No border if filled (Whiteout)
+                borderStyle: 'solid',
+                backgroundColor: ann.fill ? ann.fill : 'transparent'
+              }}
+              onMouseDown={(e) => onMouseDown(e, ann.id, 'move')}
+            >
+              {isSelected && <ResizeHandles id={ann.id} />}
+            </div>
+          );
+        }
+
+        // --- HIGHLIGHT ---
         if (ann.type === 'highlight') {
           return (
             <div
@@ -114,24 +131,30 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
           );
         }
 
-        if (ann.type === 'rect') {
-          return (
-            <div
-              key={ann.id}
-              className={`pointer-events-auto group cursor-move ${selectionRing}`}
-              style={{
-                ...baseStyle,
-                borderColor: ann.color,
-                borderWidth: `${ann.strokeWidth || 2}px`,
-                borderStyle: 'solid'
-              }}
-              onMouseDown={(e) => onMouseDown(e, ann.id, 'move')}
-            >
-              {isSelected && <ResizeHandles id={ann.id} />}
-            </div>
-          );
+        // --- OCR TEXT (Invisible Layer) ---
+        if (ann.type === 'ocr_text') {
+           return (
+             <div
+                key={ann.id}
+                className="absolute flex items-center justify-center leading-none overflow-hidden select-text pointer-events-auto"
+                style={{
+                    ...baseStyle,
+                    fontSize: `${ann.fontSize}px`,
+                    color: 'transparent',
+                    userSelect: 'text',
+                    cursor: 'text',
+                    whiteSpace: 'nowrap'
+                }}
+                title={ann.content}
+             >
+                <span className="bg-brand-blue/20 text-transparent selection:bg-brand-blue/30 selection:text-brand-blue w-full h-full block">
+                    {ann.content}
+                </span>
+             </div>
+           );
         }
 
+        // --- TEXT ---
         if (ann.type === 'text') {
           return (
             <div
@@ -144,10 +167,9 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
                 height: ann.height ? `${ann.height}%` : 'auto',
                 minWidth: '20px',
                 minHeight: '20px',
-                // When selected, add padding for the "drag handle" area
                 padding: isSelected ? '8px' : '0px',
               }}
-              onMouseDown={(e) => onMouseDown(e, ann.id, 'move')} // This handles drag on the border
+              onMouseDown={(e) => onMouseDown(e, ann.id, 'move')}
             >
               {isSelected ? (
                 <>
@@ -157,11 +179,11 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
                     onChange={(e) => onChange(ann.id, { content: e.target.value })}
                     className="w-full h-full bg-transparent text-black p-0 resize-none outline-none border-none overflow-hidden leading-tight"
                     style={{ 
-                      color: '#000000', // Always black in edit mode for visibility against white bg
+                      color: '#000000',
                       fontSize: `${ann.fontSize || 16}px`,
                       cursor: 'text'
                     }}
-                    onMouseDown={(e) => e.stopPropagation()} // Stop drag when clicking INSIDE the textarea
+                    onMouseDown={(e) => e.stopPropagation()}
                   />
                   <ResizeHandles id={ann.id} />
                 </>
@@ -177,6 +199,7 @@ export const AnnotationLayer: React.FC<AnnotationLayerProps> = ({
           );
         }
 
+        // --- COMMENT ---
         if (ann.type === 'comment') {
            return (
              <div

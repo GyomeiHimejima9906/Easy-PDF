@@ -24,11 +24,17 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    let active = true;
+    let renderTask: any = null;
+    let isCancelled = false;
+
     const renderThumb = async () => {
       if (!pdfDoc || !canvasRef.current) return;
+      
       try {
         const page = await pdfDoc.getPage(pageNumber);
+        
+        if (isCancelled) return;
+
         const viewport = page.getViewport({ scale: 0.3, rotation });
         const canvas = canvasRef.current;
         const context = canvas.getContext('2d');
@@ -36,15 +42,33 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        if (active) {
-            await page.render({ canvasContext: context, viewport }).promise;
+        const renderContext = {
+            canvasContext: context,
+            viewport: viewport,
+        };
+
+        renderTask = page.render(renderContext);
+        await renderTask.promise;
+        renderTask = null;
+
+      } catch (err: any) {
+        if (err?.name === 'RenderingCancelledException') {
+            return;
         }
-      } catch (err) {
-        console.error("Error rendering thumbnail", err);
+        if (!isCancelled) {
+            console.error("Error rendering thumbnail", err);
+        }
       }
     };
+
     renderThumb();
-    return () => { active = false; };
+
+    return () => { 
+        isCancelled = true;
+        if (renderTask) {
+            renderTask.cancel();
+        }
+    };
   }, [pdfDoc, pageNumber, rotation]);
 
   return (

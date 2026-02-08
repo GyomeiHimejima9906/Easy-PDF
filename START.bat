@@ -1,2 +1,2 @@
 npm run dev
-pause
+start msedge http://localhost:5137

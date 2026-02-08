@@ -1,52 +1,22 @@
 {
-  "name": "Easy PDF",
-  "version": "1.0.0",
+  "name": "easy-pdf",
   "private": true,
-  "main": "main.js",
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on tcp:5173 && electron .\"",
-    "electron:build": "vite build && electron-builder"
+    "preview": "vite preview"
   },
   "dependencies": {
-    "lucide-react": "^0.344.0",
-    "pdf-lib": "^1.17.1",
-    "pdfjs-dist": "^4.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "tesseract.js": "^5.0.5"
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "lucide-react": "^0.563.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
-    "@vitejs/plugin-react": "^4.2.1",
-    "concurrently": "^8.2.2",
-    "electron": "^29.1.0",
-    "electron-builder": "^24.13.3",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.4",
-    "wait-on": "^7.2.0"
-  },
-  "build": {
-    "appId": "com.pdfmaster.local",
-    "productName": "PDF Master Local",
-    "files": [
-      "dist/**/*",
-      "main.js",
-      "package.json"
-    ],
-    "directories": {
-      "output": "release"
-    },
-    "win": {
-      "target": "nsis",
-      "icon": "public/icon.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    }
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0"
   }
 }

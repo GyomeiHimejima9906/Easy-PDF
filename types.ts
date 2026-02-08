@@ -10,7 +10,7 @@ export enum AppMode {
 export interface Annotation {
   id: string;
   pageIndex: number;
-  type: 'text' | 'rect' | 'highlight' | 'freehand' | 'comment' | 'ocr_text';
+  type: 'text' | 'rect' | 'highlight' | 'freehand' | 'comment' | 'ocr_text' | 'image';
   x: number; // Percentage 0-100
   y: number; // Percentage 0-100
   width?: number; // Percentage
@@ -22,6 +22,8 @@ export interface Annotation {
   fontSize?: number;
   strokeWidth?: number;
   opacity?: number;
+  fill?: string; // For solid rectangles (Whiteout)
+  imageData?: string; // Base64 for images
 }
 
 export interface PDFPageData {

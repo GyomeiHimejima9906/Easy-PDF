@@ -36,10 +36,11 @@ export const PDFPage: React.FC<PDFPageProps> = ({
 
   // Render Page (Canvas + Text Layer)
   useEffect(() => {
+    let renderTask: any = null;
     let isCancelled = false;
 
     const render = async () => {
-      if (!pdfDoc || !canvasRef.current || !textLayerRef.current) return;
+      if (!pdfDoc || !canvasRef.current) return;
 
       try {
         const page = await pdfDoc.getPage(pageNumber);
@@ -63,7 +64,10 @@ export const PDFPage: React.FC<PDFPageProps> = ({
           viewport: viewport,
         };
         
-        await page.render(renderContext).promise;
+        // Store render task to allow cancellation
+        renderTask = page.render(renderContext);
+        await renderTask.promise;
+        renderTask = null; // Clear task when finished
         
         if (isCancelled) return;
 
@@ -85,7 +89,11 @@ export const PDFPage: React.FC<PDFPageProps> = ({
           }
         }
 
-      } catch (err) {
+      } catch (err: any) {
+        // Ignore cancellation errors
+        if (err?.name === 'RenderingCancelledException') {
+            return;
+        }
         if (!isCancelled) {
           console.error(`Error rendering page ${pageNumber}`, err);
         }
@@ -94,7 +102,12 @@ export const PDFPage: React.FC<PDFPageProps> = ({
 
     render();
 
-    return () => { isCancelled = true; };
+    return () => { 
+        isCancelled = true; 
+        if (renderTask) {
+            renderTask.cancel();
+        }
+    };
   }, [pdfDoc, pageNumber, rotation, scale]);
 
   // Handle local coordinates

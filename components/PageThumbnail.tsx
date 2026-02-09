@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 
 interface PageThumbnailProps {
@@ -9,6 +10,7 @@ interface PageThumbnailProps {
   onDragStart: (e: React.DragEvent) => void;
   onDragOver: (e: React.DragEvent) => void;
   onDrop: (e: React.DragEvent) => void;
+  isHighContrast?: boolean;
 }
 
 export const PageThumbnail: React.FC<PageThumbnailProps> = ({ 
@@ -19,7 +21,8 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
   isSelected,
   onDragStart,
   onDragOver,
-  onDrop
+  onDrop,
+  isHighContrast
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -83,8 +86,12 @@ export const PageThumbnail: React.FC<PageThumbnailProps> = ({
       onDragOver={onDragOver}
       onDrop={onDrop}
     >
-        <div className="bg-stone-800 p-2 rounded-lg shadow-sm border border-white/5">
-            <canvas ref={canvasRef} className="rounded-sm max-w-full h-auto mx-auto bg-white" />
+        <div className={`bg-stone-800 p-2 rounded-lg shadow-sm border border-white/5 overflow-hidden`}>
+            <canvas 
+                ref={canvasRef} 
+                className="rounded-sm max-w-full h-auto mx-auto bg-white transition-all duration-300"
+                style={{ filter: isHighContrast ? 'invert(1) hue-rotate(180deg)' : 'none' }}
+            />
         </div>
         <div className="mt-2 text-center text-xs font-medium text-stone-500 group-hover:text-stone-300 transition-colors">
             Page {pageNumber}

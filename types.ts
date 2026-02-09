@@ -10,7 +10,7 @@ export enum AppMode {
 export interface Annotation {
   id: string;
   pageIndex: number;
-  type: 'text' | 'rect' | 'highlight' | 'freehand' | 'comment' | 'ocr_text' | 'image';
+  type: 'text' | 'rect' | 'highlight' | 'freehand' | 'comment' | 'ocr_text' | 'image' | 'latex';
   x: number; // Percentage 0-100
   y: number; // Percentage 0-100
   width?: number; // Percentage
@@ -24,6 +24,7 @@ export interface Annotation {
   opacity?: number;
   fill?: string; // For solid rectangles (Whiteout)
   imageData?: string; // Base64 for images
+  vertical?: boolean; // For Vertical Writing (CJK)
 }
 
 export interface PDFPageData {
@@ -39,11 +40,13 @@ export interface Tool {
   action?: () => void;
 }
 
-// Mocking Tesseract types globally since we load via script tag
+// Mocking global libraries
 declare global {
   interface Window {
     Tesseract: any;
     pdfjsLib: any;
     PDFLib: any;
+    katex: any;
+    JSZip: any;
   }
 }

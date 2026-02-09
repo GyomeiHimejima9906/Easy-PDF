@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Layers, FileOutput, PenTool, ScanText, Eye } from 'lucide-react';
 import { AppMode } from '../types';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface SideBarProps {
   currentMode: AppMode;
@@ -8,18 +10,19 @@ interface SideBarProps {
 }
 
 export const SideBar: React.FC<SideBarProps> = ({ currentMode, setMode }) => {
+  const { t } = useLanguage();
   
   const modes = [
-    { id: AppMode.VIEW, icon: Eye, label: 'View', color: 'text-stone-300', activeBg: 'bg-stone-800' },
-    { id: AppMode.PAGES, icon: Layers, label: 'Pages', color: 'text-brand-yellow', activeBg: 'bg-yellow-500/10' },
-    { id: AppMode.COMPRESS, icon: FileOutput, label: 'Size', color: 'text-brand-green', activeBg: 'bg-green-500/10' },
-    { id: AppMode.EDIT, icon: PenTool, label: 'Edit', color: 'text-brand-purple', activeBg: 'bg-purple-500/10' },
-    { id: AppMode.OCR, icon: ScanText, label: 'OCR', color: 'text-brand-blue', activeBg: 'bg-blue-500/10' },
+    { id: AppMode.VIEW, icon: Eye, label: t('view'), color: 'text-stone-300', activeBg: 'bg-stone-800' },
+    { id: AppMode.PAGES, icon: Layers, label: t('pages'), color: 'text-brand-yellow', activeBg: 'bg-yellow-500/10' },
+    { id: AppMode.COMPRESS, icon: FileOutput, label: t('size'), color: 'text-brand-green', activeBg: 'bg-green-500/10' },
+    { id: AppMode.EDIT, icon: PenTool, label: t('edit'), color: 'text-brand-purple', activeBg: 'bg-purple-500/10' },
+    { id: AppMode.OCR, icon: ScanText, label: t('ocr'), color: 'text-brand-blue', activeBg: 'bg-blue-500/10' },
   ];
 
   return (
     <div className="
-      glass-panel z-40
+      glass-panel z-[60]
       fixed 
       /* PORTRAIT (Taller than wide - Smartphone feel): Bottom Bar */
       portrait:bottom-0 portrait:left-0 portrait:w-full portrait:h-16 portrait:border-t portrait:border-white/5 portrait:flex-row portrait:justify-around portrait:px-2
